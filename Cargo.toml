@@ -1,0 +1,11 @@
+[package]
+name = "rustic-memory-store"
+version = "0.1.0"
+authors = ["Max Jöhnk <maxjoehnk@gmail.com>"]
+
+[dependencies]
+log = "0.4"
+failure = "0.1"
+
+[dependencies.rustic-core]
+git = "https://github.com/rustic-music-player/core"
