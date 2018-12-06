@@ -1,6 +1,9 @@
-use rustic::{Album, Artist, Track, Playlist, Library, SearchResults};
-use std::sync::{RwLock, atomic::{AtomicUsize, Ordering}};
 use failure::Error;
+use rustic::{Album, Artist, Library, Playlist, SearchResults, Track};
+use std::sync::{
+    atomic::{AtomicUsize, Ordering},
+    RwLock,
+};
 
 #[derive(Debug)]
 pub struct MemoryLibrary {
@@ -11,7 +14,7 @@ pub struct MemoryLibrary {
     pub albums: RwLock<Vec<Album>>,
     pub artists: RwLock<Vec<Artist>>,
     pub tracks: RwLock<Vec<Track>>,
-    pub playlists: RwLock<Vec<Playlist>>
+    pub playlists: RwLock<Vec<Playlist>>,
 }
 
 impl MemoryLibrary {
@@ -24,14 +27,15 @@ impl MemoryLibrary {
             albums: RwLock::new(vec![]),
             artists: RwLock::new(vec![]),
             tracks: RwLock::new(vec![]),
-            playlists: RwLock::new(vec![])
+            playlists: RwLock::new(vec![]),
         }
     }
 }
 
 impl Library for MemoryLibrary {
     fn get_track(&self, id: &usize) -> Result<Option<Track>, Error> {
-        let track = self.tracks
+        let track = self
+            .tracks
             .read()
             .unwrap()
             .iter()
@@ -41,15 +45,13 @@ impl Library for MemoryLibrary {
     }
 
     fn get_tracks(&self) -> Result<Vec<Track>, Error> {
-        let tracks = self.tracks
-            .read()
-            .unwrap()
-            .clone();
+        let tracks = self.tracks.read().unwrap().clone();
         Ok(tracks)
     }
 
     fn get_album(&self, id: &usize) -> Result<Option<Album>, Error> {
-        let album = self.albums
+        let album = self
+            .albums
             .read()
             .unwrap()
             .iter()
@@ -59,15 +61,13 @@ impl Library for MemoryLibrary {
     }
 
     fn get_albums(&self) -> Result<Vec<Album>, Error> {
-        let albums = self.albums
-            .read()
-            .unwrap()
-            .clone();
+        let albums = self.albums.read().unwrap().clone();
         Ok(albums)
     }
 
     fn get_artist(&self, id: &usize) -> Result<Option<Artist>, Error> {
-        let artist = self.artists
+        let artist = self
+            .artists
             .read()
             .unwrap()
             .iter()
@@ -77,15 +77,13 @@ impl Library for MemoryLibrary {
     }
 
     fn get_artists(&self) -> Result<Vec<Artist>, Error> {
-        let artists = self.artists
-            .read()
-            .unwrap()
-            .clone();
+        let artists = self.artists.read().unwrap().clone();
         Ok(artists)
     }
 
     fn get_playlist(&self, id: &usize) -> Result<Option<Playlist>, Error> {
-        let playlist = self.playlists
+        let playlist = self
+            .playlists
             .read()
             .unwrap()
             .iter()
@@ -95,10 +93,7 @@ impl Library for MemoryLibrary {
     }
 
     fn get_playlists(&self) -> Result<Vec<Playlist>, Error> {
-        let playlists = self.playlists
-            .read()
-            .unwrap()
-            .clone();
+        let playlists = self.playlists.read().unwrap().clone();
         Ok(playlists)
     }
 
@@ -127,49 +122,37 @@ impl Library for MemoryLibrary {
     }
 
     fn add_tracks(&self, tracks: &mut Vec<Track>) -> Result<(), Error> {
-        let tracks = tracks
-            .iter()
-            .cloned()
-            .map(|mut track| {
-                track.id = Some(self.track_id.fetch_add(1, Ordering::Relaxed));
-                track
-            });
+        let tracks = tracks.iter().cloned().map(|mut track| {
+            track.id = Some(self.track_id.fetch_add(1, Ordering::Relaxed));
+            track
+        });
         self.tracks.write().unwrap().extend(tracks);
         Ok(())
     }
 
     fn add_albums(&self, albums: &mut Vec<Album>) -> Result<(), Error> {
-        let albums = albums
-            .iter()
-            .cloned()
-            .map(|mut album| {
-                album.id = Some(self.album_id.fetch_add(1, Ordering::Relaxed));
-                album
-            });
+        let albums = albums.iter().cloned().map(|mut album| {
+            album.id = Some(self.album_id.fetch_add(1, Ordering::Relaxed));
+            album
+        });
         self.albums.write().unwrap().extend(albums);
         Ok(())
     }
 
     fn add_artists(&self, artists: &mut Vec<Artist>) -> Result<(), Error> {
-        let artists = artists
-            .iter()
-            .cloned()
-            .map(|mut artist| {
-                artist.id = Some(self.artist_id.fetch_add(1, Ordering::Relaxed));
-                artist
-            });
+        let artists = artists.iter().cloned().map(|mut artist| {
+            artist.id = Some(self.artist_id.fetch_add(1, Ordering::Relaxed));
+            artist
+        });
         self.artists.write().unwrap().extend(artists);
         Ok(())
     }
 
     fn add_playlists(&self, playlists: &mut Vec<Playlist>) -> Result<(), Error> {
-        let playlists = playlists
-            .iter()
-            .cloned()
-            .map(|mut playlist| {
-                playlist.id = Some(self.playlist_id.fetch_add(1, Ordering::Relaxed));
-                playlist
-            });
+        let playlists = playlists.iter().cloned().map(|mut playlist| {
+            playlist.id = Some(self.playlist_id.fetch_add(1, Ordering::Relaxed));
+            playlist
+        });
         self.playlists.write().unwrap().extend(playlists);
         Ok(())
     }
@@ -177,10 +160,7 @@ impl Library for MemoryLibrary {
     fn sync_track(&self, track: &mut Track) -> Result<(), Error> {
         let has_track = {
             let tracks = self.tracks.read().unwrap();
-            tracks
-                .iter()
-                .find(|a| a.uri == track.uri)
-                .map(|a| a.id)
+            tracks.iter().find(|a| a.uri == track.uri).map(|a| a.id)
         };
 
         let id: usize = has_track
@@ -189,10 +169,7 @@ impl Library for MemoryLibrary {
         track.id = Some(id);
 
         if has_track.is_none() {
-            self.tracks
-                .write()
-                .unwrap()
-                .push(track.clone());
+            self.tracks.write().unwrap().push(track.clone());
         }
         Ok(())
     }
@@ -200,10 +177,7 @@ impl Library for MemoryLibrary {
     fn sync_album(&self, album: &mut Album) -> Result<(), Error> {
         let has_album = {
             let albums = self.albums.read().unwrap();
-            albums
-                .iter()
-                .find(|a| a.uri == album.uri)
-                .map(|a| a.id)
+            albums.iter().find(|a| a.uri == album.uri).map(|a| a.id)
         };
 
         let id: usize = has_album
@@ -212,10 +186,7 @@ impl Library for MemoryLibrary {
         album.id = Some(id);
 
         if has_album.is_none() {
-            self.albums
-                .write()
-                .unwrap()
-                .push(album.clone());
+            self.albums.write().unwrap().push(album.clone());
         }
         Ok(())
     }
@@ -223,10 +194,7 @@ impl Library for MemoryLibrary {
     fn sync_artist(&self, artist: &mut Artist) -> Result<(), Error> {
         let has_artist = {
             let artists = self.artists.read().unwrap();
-            artists
-                .iter()
-                .find(|a| a.uri == artist.uri)
-                .map(|a| a.id)
+            artists.iter().find(|a| a.uri == artist.uri).map(|a| a.id)
         };
 
         let id: usize = has_artist
@@ -235,10 +203,7 @@ impl Library for MemoryLibrary {
         artist.id = Some(id);
 
         if has_artist.is_none() {
-            self.artists
-                .write()
-                .unwrap()
-                .push(artist.clone());
+            self.artists.write().unwrap().push(artist.clone());
         }
         Ok(())
     }
@@ -258,10 +223,7 @@ impl Library for MemoryLibrary {
         playlist.id = Some(id);
 
         if has_playlist.is_none() {
-            self.playlists
-                .write()
-                .unwrap()
-                .push(playlist.clone());
+            self.playlists.write().unwrap().push(playlist.clone());
         }
         Ok(())
     }
@@ -276,8 +238,7 @@ impl Library for MemoryLibrary {
                     .find(|t| t.uri == track.uri)
                     .map(|_t| false)
                     .unwrap_or(true)
-            })
-            .map(|mut track| self.add_track(&mut track))
+            }).map(|mut track| self.add_track(&mut track))
             .collect()
     }
 
@@ -291,8 +252,7 @@ impl Library for MemoryLibrary {
                     .find(|t| t.uri == album.uri)
                     .map(|_t| false)
                     .unwrap_or(true)
-            })
-            .map(|mut album| self.add_album(&mut album))
+            }).map(|mut album| self.add_album(&mut album))
             .collect()
     }
 
@@ -306,8 +266,7 @@ impl Library for MemoryLibrary {
                     .find(|t| t.uri == artist.uri)
                     .map(|_t| false)
                     .unwrap_or(true)
-            })
-            .map(|mut artist| self.add_artist(&mut artist))
+            }).map(|mut artist| self.add_artist(&mut artist))
             .collect()
     }
 
@@ -321,13 +280,13 @@ impl Library for MemoryLibrary {
                     .find(|p| p.uri == playlist.uri)
                     .map(|_p| false)
                     .unwrap_or(true)
-            })
-            .map(|mut p| self.add_playlist(&mut p))
+            }).map(|mut p| self.add_playlist(&mut p))
             .collect()
     }
 
     fn search(&self, query: String) -> Result<SearchResults, Error> {
-        let tracks = self.tracks
+        let tracks = self
+            .tracks
             .read()
             .unwrap()
             .iter()
@@ -339,7 +298,7 @@ impl Library for MemoryLibrary {
             tracks,
             albums: vec![],
             artists: vec![],
-            playlists: vec![]
+            playlists: vec![],
         })
     }
 }
