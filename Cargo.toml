@@ -8,7 +8,6 @@ repository = "https://github.com/rustic-music-player/memory-store"
 homepage = "https://github.com/rustic-music-player/memory-store"
 
 [dependencies]
-log = "0.4"
 failure = "0.1"
 
 [dependencies.rustic-core]
