@@ -5,7 +5,7 @@ use std::sync::{
     RwLock,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct MemoryLibrary {
     album_id: AtomicUsize,
     artist_id: AtomicUsize,
@@ -24,23 +24,20 @@ impl MemoryLibrary {
             artist_id: AtomicUsize::new(1),
             track_id: AtomicUsize::new(1),
             playlist_id: AtomicUsize::new(1),
-            albums: RwLock::new(vec![]),
-            artists: RwLock::new(vec![]),
-            tracks: RwLock::new(vec![]),
-            playlists: RwLock::new(vec![]),
+            ..MemoryLibrary::default()
         }
     }
 }
 
 impl Library for MemoryLibrary {
-    fn get_track(&self, id: &usize) -> Result<Option<Track>, Error> {
+    fn get_track(&self, id: usize) -> Result<Option<Track>, Error> {
         let track = self
             .tracks
             .read()
             .unwrap()
             .iter()
             .cloned()
-            .find(|track| track.id == Some(*id));
+            .find(|track| track.id == Some(id));
         Ok(track)
     }
 
@@ -49,14 +46,14 @@ impl Library for MemoryLibrary {
         Ok(tracks)
     }
 
-    fn get_album(&self, id: &usize) -> Result<Option<Album>, Error> {
+    fn get_album(&self, id: usize) -> Result<Option<Album>, Error> {
         let album = self
             .albums
             .read()
             .unwrap()
             .iter()
             .cloned()
-            .find(|album| album.id == Some(*id));
+            .find(|album| album.id == Some(id));
         Ok(album)
     }
 
@@ -65,14 +62,14 @@ impl Library for MemoryLibrary {
         Ok(albums)
     }
 
-    fn get_artist(&self, id: &usize) -> Result<Option<Artist>, Error> {
+    fn get_artist(&self, id: usize) -> Result<Option<Artist>, Error> {
         let artist = self
             .artists
             .read()
             .unwrap()
             .iter()
             .cloned()
-            .find(|artist| artist.id == Some(*id));
+            .find(|artist| artist.id == Some(id));
         Ok(artist)
     }
 
@@ -81,14 +78,14 @@ impl Library for MemoryLibrary {
         Ok(artists)
     }
 
-    fn get_playlist(&self, id: &usize) -> Result<Option<Playlist>, Error> {
+    fn get_playlist(&self, id: usize) -> Result<Option<Playlist>, Error> {
         let playlist = self
             .playlists
             .read()
             .unwrap()
             .iter()
             .cloned()
-            .find(|playlist| playlist.id == Some(*id));
+            .find(|playlist| playlist.id == Some(id));
         Ok(playlist)
     }
 
@@ -230,7 +227,7 @@ impl Library for MemoryLibrary {
 
     fn sync_tracks(&self, tracks: &mut Vec<Track>) -> Result<(), Error> {
         tracks
-            .into_iter()
+            .iter_mut()
             .filter(|track| {
                 let tracks = self.tracks.read().unwrap();
                 tracks
@@ -244,7 +241,7 @@ impl Library for MemoryLibrary {
 
     fn sync_albums(&self, albums: &mut Vec<Album>) -> Result<(), Error> {
         albums
-            .into_iter()
+            .iter_mut()
             .filter(|album| {
                 let albums = self.albums.read().unwrap();
                 albums
@@ -258,7 +255,7 @@ impl Library for MemoryLibrary {
 
     fn sync_artists(&self, artists: &mut Vec<Artist>) -> Result<(), Error> {
         artists
-            .into_iter()
+            .iter_mut()
             .filter(|artist| {
                 let artists = self.artists.read().unwrap();
                 artists
@@ -272,7 +269,7 @@ impl Library for MemoryLibrary {
 
     fn sync_playlists(&self, playlists: &mut Vec<Playlist>) -> Result<(), Error> {
         playlists
-            .into_iter()
+            .iter_mut()
             .filter(|playlist| {
                 let playlists = self.playlists.read().unwrap();
                 playlists
