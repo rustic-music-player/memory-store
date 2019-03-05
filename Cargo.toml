@@ -6,6 +6,7 @@ license = "GPL-3.0"
 readme = "README.md"
 repository = "https://github.com/rustic-music-player/memory-store"
 homepage = "https://github.com/rustic-music-player/memory-store"
+edition = "2018"
 
 [dependencies]
 failure = "0.1"

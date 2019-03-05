@@ -1,5 +1,5 @@
 use failure::Error;
-use rustic::{Album, Artist, Library, Playlist, SearchResults, Track};
+use rustic_core::{Album, Artist, Library, Playlist, SearchResults, Track};
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
     RwLock,
